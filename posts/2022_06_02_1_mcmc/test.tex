@@ -1,0 +1,208 @@
+\documentclass{homework}
+\usepackage{braket}
+\usepackage[title,titletoc,toc]{appendix}
+%\usepackage{mathtools}
+%\DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
+\newcommand{\norm}[1]{\lVert #1 \rVert}
+
+\begin{document}
+
+% \maketitle
+
+\section{Stochastic gradient systems: quadratic dynamics and level set enhancements}
+\subsection{Introduction}
+Consider the following stochastic ODE:
+\begin{align}
+    d\textbf{x}_t &= -\textbf{A}\textbf{x}_t\,dt + \sqrt{2\beta^{-1}} d\textbf{W}_t
+\end{align}
+The Fokker-Planck equation this process induces is
+\begin{align}
+    \partial_t \rho &= \nabla\cdot(\textbf{A}\textbf{x} \rho) + \beta^{-1} \nabla^2 \rho = \text{Tr}[\textbf{A}] \rho + \textbf{A}\textbf{x} \cdot \nabla \rho + \beta^{-1} \nabla^2 \rho
+\end{align}
+The invariant distribution associated with this equation is
+\begin{align}
+    \tilde{\rho} &= \exp(-\beta \textbf{x}^\dagger \textbf{C}^{-1} \textbf{x})
+\end{align}
+where $\textbf{C}$ solves the Lyapunov equation $\textbf{A}\textbf{C} + \textbf{C}\textbf{A}^\dagger = 2\textbf{I}$. We would like to solve the full Fokker-Planck equation for this system. To do this we will first quotient out the invariant distribution and write the equation for $h = \frac{\rho}{\tilde{\rho}}$:
+\begin{align}\label{eq:heq}
+    \partial_t h &= h(\text{Tr}[\textbf{C}^{-1}]-\text{Tr}[\textbf{A}] - \beta \textbf{x}^\dagger \textbf{A}^\dagger \textbf{C}^{-1}\textbf{x} + \beta \textbf{x}^\dagger \textbf{C}^{-2} \textbf{x}) + \nabla h \cdot [-2\textbf{C}^{-1}\textbf{x} + \textbf{A}\textbf{x}] + \beta^{-1}\nabla^{2}h
+\end{align}
+When $\textbf{A} = \textbf{A}^\dagger$ and thus $-\textbf{A}\textbf{x}$ is the negative gradient of a potential, $\textbf{C}^{-1} = \textbf{A}$ and this equation reduces to
+\begin{align}\label{eq:hsimple}
+    \partial_t h &= -\nabla h \cdot \textbf{A}\textbf{x} + \beta^{-1}\nabla^2 h
+\end{align}
+This is a linear equation, and in order to solve it we will try to obtain the eigenvalues and eigenfunctions. This is very easy to do in this case as these are all polynomial functions. The ground state $h(x) = c$ is an eigenfunction associated with eigenvalue zero. For eigenfunctions of the next order polynomial order, $\textbf{w}^\dagger \textbf{x}$, the equation is
+\begin{align}
+    \lambda \textbf{w}^\dagger \textbf{x} &= - \textbf{w}^\dagger \textbf{A}\textbf{x}
+\end{align}
+which entails that $\textbf{w}$ are the eigenvectors of $\textbf{A}$ and $\lambda$ the negatives of the associated eigenvalues of $\textbf{A}$. These eigenvalues are the largest nonzero eigenvalues of our system and thus dictate the rate of asymptotic convergence to the stationary distribution.
+
+Suppose we now perturb our dynamical matrix $\textbf{A}' = \textbf{A} - \textbf{T}$ with a perturbation $\textbf{T}$ that leaves $\textbf{C} $ invariant. This gives the following condition on $\textbf{T}$:
+\begin{align*}
+    2\textbf{I} &= (\textbf{A} + \textbf{T})\textbf{A}^{-1} + \textbf{A}^{-1} (\textbf{A} + \textbf{T}^\dagger) \\
+    \implies 0 &= \textbf{T}\textbf{A}^{-1} + \textbf{A}^{-1} \textbf{T}^\dagger
+\end{align*}
+Since $\textbf{T}^\dagger \textbf{A} = (\textbf{A}\textbf{T})^\dagger$, we see that $\textbf{T}^\dagger \textbf{A}$ is antisymmetric. One consequence of this is that the flow induced by $\textbf{T}$ at a point $\textbf{x}$, given by $\textbf{T}\textbf{x}$, is orthogonal to the gradient $\textbf{A}\textbf{x}$ at that point. We will look at which linear transformations satisfy this condition later; for now, we substitute $\textbf{T} - \textbf{A}$ into our equation, which gives
+\begin{align*}
+    \partial_t h &= -h(\textbf{x}^\dagger \textbf{T}^\dagger \textbf{A} \textbf{x}) + \nabla h \cdot[(\textbf{T}-\textbf{A})\textbf{x}] + \beta^{-1} \nabla^2 h
+\end{align*}
+Since $\textbf{T}^\dagger \textbf{A}$ is antisymmetric, the first term vanishes and we are left with
+\begin{align*}
+    \partial_t h &= \nabla h \cdot [(\textbf{T}- \textbf{A})\textbf{x}] +\beta^{-1}\nabla^2 h
+\end{align*}
+This is in essentially the same form as before. In this case the eigenvalues associated with the lowest-order eigenfunctions of are the eigenvalues of $\textbf{T} - \textbf{A}$. The rate of convergence is dictated by the real part of these eigenvalues. We would like to know if the perturbation $\textbf{T}$ increases this rate, i.e. makes the largest nonzero real part of the eigenvalues smaller.
+
+What linear transformations satisfy our antisymmetry condition? In two dimensions it is very clear: $\textbf{T} = \epsilon\textbf{R} \textbf{A}$, where $\textbf{R}$ is a $\pi/2$ rotation matrix of positive or negative sign. In higher dimensions this is not as convenient: there is always an invariant $d-2$ dimensional subspace of a rotation matrix, and any $\textbf{x}$ such that $\textbf{A}\textbf{x}$ has a nonzero projection onto that subspace will not have $\textbf{T}\textbf{x}$ and $\textbf{A}\textbf{x}$ orthogonal without further correction to $\textbf{T}\textbf{x}$. The correction here, however, is quite obvious: we simply project $\textbf{A}\textbf{x}$ onto the subspace orthogonal to the invariant subspace, and then rotate. This gives us $\textbf{T} = \epsilon \textbf{R}_{ S} \textbf{P}_{\perp S} \textbf{A}$, where $\textbf{R}_{S}$ is a $\pi/2$ unitary transformation that leaves the subspace $S$ invariant, and $\textbf{P}_{\perp S} = \textbf{I} - \textbf{P}_{\textbf{S}}$ is the antiprojection operator for this subspace.
+
+Are these the only matrices that satisfy this condition? The answer is yes, which can be seen from a dimension counting argument. The antisymmetry condition $\textbf{T}^\dagger \textbf{A} = -\textbf{A}\textbf{T}$ reads $\textbf{t}_i^\dagger \textbf{a}_j = -\textbf{a}_i^\dagger \textbf{t}_j$ for each $i,j$ pair. There are $d(d-1)/2$ independent conditions here due to the symmetry of $\textbf{A}$, so we expect the solution manifold to be $(d^2 - d(d-1)/2)$-dimensional. And indeed, picking a single $(d-2)$ dimensional invariant subspace $S$ is equivalent to picking 2 orthogonal $d$-dimensional vectors, which has the appropriate dimensionality for the problem.
+
+\subsection{Perturbation theory}
+
+We will first approach this question perturbatively, in order to answer the basic question: can adding a small velocity orthogonal to the gradient \textit{ever} add a speed up? The first-order perturbation equation is
+\begin{align*}
+    (\epsilon \textbf{R}_{S} \textbf{P}_{\perp S} \textbf{A} - \textbf{A}) (\textbf{v}_{\lambda}^0 + \epsilon \textbf{v}_{\lambda}^1) &= (\lambda_0 + \epsilon \lambda_1) (\textbf{v}_{\lambda}^0 + \epsilon \textbf{v}_{\lambda}^1)
+\end{align*}
+
+The first-order in $\epsilon$ corrections to the eigenvalues $\lambda$ of $-\textbf{A}$ are
+\begin{align*}
+    \lambda_1 =\langle \textbf{v}_{\lambda}^0, \textbf{R}_{S} \textbf{P}_{\perp S} \textbf{A} \textbf{v}_{\lambda}^0 \rangle = -\lambda_0 \langle \textbf{v}_{\lambda}^0, \textbf{R}_{S} \textbf{P}_{\perp S}  \textbf{v}_{\lambda}^0 \rangle = 0
+\end{align*}
+The equation for $\textbf{v}_{\lambda}^1$ is then given by
+\begin{align*}
+    -\lambda_0 \textbf{R}_{S} \textbf{P}_{\perp S}  \textbf{v}_{\lambda}^0 = (\textbf{A} + \lambda_0) \textbf{v}_{\lambda}^1
+\end{align*}
+While $\textbf{A} + \lambda_0$ is singular, $\textbf{v}^1_\lambda$ is orthogonal to its nullspace (i.e. the span of $\textbf{v}^0_{\lambda}$). We can thus invert for $\textbf{v}_{\lambda}^1$:
+\begin{align*}
+    \textbf{v}_{\lambda}^1 &= -\lambda_0 \sum_{\gamma \neq \lambda} \frac{\langle\textbf{v}_{\gamma}^0, \textbf{R}_{S} \textbf{P}_{\perp S}  \textbf{v}_{\lambda}^0\rangle}{\lambda_0 - \gamma_0} \textbf{v}_{\gamma}^0
+\end{align*}
+To see the effects of $\textbf{T}$ on the eigenvalues, we need to pass to at least second order. The second-order perturbation equation is
+\begin{align*}
+    \textbf{R}_{S}\textbf{P}_{\perp S}\textbf{A} \textbf{v}_{\lambda}^1 - \textbf{A} \textbf{v}_{\lambda}^2 &= \lambda_2 \textbf{v}_\lambda^0 + \lambda_0 \textbf{v}_{\lambda}^2
+\end{align*}
+Taking the inner product with $\textbf{v}_\lambda^0$ on both sides and then subtracting like terms yields
+\begin{align*}
+    \lambda_2 &= \langle \textbf{v}_\lambda^0,   \textbf{R}_{S}\textbf{P}_{\perp S} \textbf{A} \textbf{v}_{\lambda}^1 \rangle\\
+    &= -\lambda_0 \sum_{\gamma \neq \lambda} \frac{\langle \textbf{v}_{\gamma}^0, \textbf{R}_{S}\textbf{P}_{\perp S} \textbf{v}_{\lambda}^0 \rangle \langle \textbf{v}_\lambda^0, \textbf{R}_{S}\textbf{P}_{\perp S} \textbf{A} \textbf{v}_{\gamma}^0\rangle }{\lambda_0 - \gamma_0}\\
+    &= \lambda_0 \sum_{\gamma \neq \lambda} \gamma_0 \frac{\langle \textbf{v}_{\gamma}^0, \textbf{R}_{S}\textbf{P}_{\perp S} \textbf{v}_{\lambda}^0 \rangle \langle \textbf{v}_\lambda^0, \textbf{R}_{S}\textbf{P}_{\perp S} \textbf{v}_{\gamma}^0\rangle }{\lambda_0 - \gamma_0}
+\end{align*}
+$\textbf{R}_S \textbf{P}_{\dagger S}$ is anti-Hermitian, and thus the term $\langle \textbf{v}_{\gamma}^0, \textbf{R}_{\pi/2} \textbf{v}_{\lambda}^0 \rangle \langle \textbf{v}_\lambda^0, \textbf{R}_{\pi/2} \textbf{v}_{\gamma}^0\rangle$ is negative or zero. For the largest eigenvalue $\lambda_0$, $\lambda_0$ is negative, $\gamma_0$ is negative, $\lambda_0 - \gamma_0$ is positive, and the numerator is negative, so the overall sign of the perturbation term is negative. Thus there is a regime wherein any sufficiently small perturbation of the appropriate form will, at least, not decrease the rate of convergence. 
+
+\subsection{Global analysis: $n$-d and 2d}
+Consider the eigenvalue equation for the perturbed system:
+\begin{align*}
+    (\epsilon \textbf{T} - \textbf{A}) \textbf{v}_{\epsilon} &= \lambda_\epsilon \textbf{v}_\epsilon
+\end{align*}
+We multiply both sides on the right by $\textbf{A}$, then apply $\textbf{v}_{\epsilon}^\dagger$. Since $\textbf{A}\textbf{T}$ is antisymmetric, the term involving $\textbf{v}^\dagger_\epsilon \textbf{A}\textbf{T} \textbf{v}_\epsilon$ must be zero or purely imaginary, and we are left with
+\begin{align*}
+    \mathbb{Re}[\lambda_{\epsilon}] &= -\frac{\textbf{v}_{\epsilon}^\dagger \textbf{A}^2 \textbf{v}_{\epsilon}}{\textbf{v}_{\epsilon}^\dagger \textbf{A} \textbf{v}_{\epsilon}}
+\end{align*}
+From this we get a global bound on the eigenvalues we can obtain via an orthogonal perturbation:
+\begin{align*}
+    \mathbb{Re}[\lambda_{\epsilon}] \leq -\gamma_{\text{max}}
+\end{align*}
+where $\gamma_{\text{max}}$ is the largest eigenvalue of $\textbf{A}$.
+
+We can get a more detailed picture in two dimensions. Let us work in the basis of the eigenvectors of $\textbf{A}$, with $\lambda^0$ being the larger of the two. We then have
+\begin{align*}
+    (\epsilon \textbf{T} - \textbf{A}) &= \begin{pmatrix}
+    -\lambda^0 & -\epsilon \lambda^1\\
+    \epsilon \lambda^0 & -\lambda^1
+    \end{pmatrix}
+\end{align*}
+The characteristic polynomial is then
+\begin{align*}
+    0 &= (\lambda_\epsilon + \lambda^0)(\lambda_\epsilon + \lambda^1) + \epsilon^2 \lambda^1 \lambda^0\\
+    &= \lambda_\epsilon^2 + (\lambda^0 + \lambda^1)\lambda_\epsilon + (1 + \epsilon^2) \lambda^1 \lambda^0
+\end{align*}
+which in turn implies
+\begin{align*}
+    \lambda_\epsilon &= -\frac{\lambda^0 + \lambda^1}{2} \pm \frac{\sqrt{(\lambda^0 + \lambda^1)^2 - 4(1+ \epsilon^2)\lambda^1\lambda^0}}{2}
+\end{align*}
+The eigenvalue with the maximal real part is given by the $+$ option. This value is strictly decreasing with $\epsilon$, until the discriminant is negative, at which point the largest real part is given by $-\frac{\lambda_0 + \lambda_1}{2}$. This implies that the maximal speedup is only $\frac{1}{2}(\lambda_0 - \lambda_1)$, and not $\lambda_0 - \lambda_1$ as the bound would imply.
+
+In higher dimensions things are not quite as convenient to analyze, but we give a simple heuristic argument for how the eigenvalues should scale.  Instead of working in the eigenbasis of $\textbf{A}$, we will consider a basis such that the invariant subspace $S$ and its orthogonal complement $\perp S$ are spanned by independent basis vectors. In such a representation, we can write
+\begin{align*}
+    \epsilon \textbf{T} - \textbf{A} &= \begin{pmatrix}
+     (\epsilon \textbf{r} - \textbf{I})\textbf{A}_{\perp S, \perp S} & -\textbf{A}_{\perp S , S}\\
+     -\textbf{A}_{S, \perp S} & -\textbf{A}_{S, S}
+    \end{pmatrix}
+\end{align*}
+where
+\begin{align*}
+    \textbf{r} = \begin{pmatrix}
+    0 & - 1\\
+    1 &0
+    \end{pmatrix}
+\end{align*}
+Immediately we notice that the upper block matrix has the same eigenvalues and eigenvectors as the 2d problem we solved previously. Since this represents the component where the horizontal flow is enhanced, we suggest (heuristically) that the best maximal eigenvalue for $\epsilon \textbf{T} - \textbf{A}$ is obtained by choosing $S$ to be the span of the maximal and minimal eigenvectors of $-\textbf{A}$, yielding the same averaging behavior as before. Of course, the works only up to a point; in the heuristic regime the best maximal eigenvalue is the maximum of this value, an the second largest eigenvalue of $-\textbf{A}$.
+
+
+
+\section{Hamiltonian Monte Carlo}
+
+% \subsection{Definitions and analysis in a quadratic potential}
+The above system is a toy model that helps us understand the benefits of moving along the level sets of the invariant distribution. However, this is not typically the algorithm used in practice to exploit the speedups conferred by this phenomenon. A more commonly used algorithm is Hamiltonian Monte Carlo (HMC). HMC adds auxiliary momenta $\textbf{p}_t$ to the state variables $\textbf{x}_t$, and stochastically force the momenta instead of the the state.
+
+We start by defining a Hamiltonian for the momentum and position. We will typically want it to be one where the momentum and the position are uncoupled (although we will return to an example where this is not the case later) so that the marginal distribution for $\textbf{x}$ is easy to analyze, such as the following:
+\begin{align*}
+    H(\textbf{x},\textbf{p}) &= U(\textbf{x}) + \frac{\norm{\textbf{p}}^2}{2m}
+\end{align*}
+We then define the chain dynamics as follows:
+\begin{align*}
+    d\textbf{x}_t &= \nabla_\textbf{p} H\,dt\\
+    d\textbf{p}_t &= -\nabla_\textbf{x} H\,dt - \nabla H_\textbf{p}\,dt + \sqrt{2\beta^{-1}} d\textbf{W}_t
+\end{align*}
+We take as ansatz for the invariant distribution $\rho = \exp(-\beta H)$. To verify this, we examine Fokker-Planck evolution of this distribution:
+\begin{align*}
+    \partial_t \rho &= -\nabla_\textbf{x}\cdot[\nabla_\textbf{p} H \rho] + \nabla_\textbf{p} \cdot[(\nabla_\textbf{x} H + \nabla_\textbf{p} H)\rho] + \beta^{-1} \nabla_\textbf{p}^2 \rho\\
+    &= \rho [-\nabla_\textbf{x} \cdot \nabla_\textbf{p}H + \beta \nabla_\textbf{p} H \cdot \nabla_\textbf{x} H] + \rho [\nabla_\textbf{p}\cdot \nabla_\textbf{x} H - \beta \nabla_\textbf{p} H \cdot \nabla_\textbf{x} H]\\
+    &+\rho[\nabla_\textbf{p}^2 H - \beta \nabla_\textbf{p} H \cdot \nabla_\textbf{p} H] + \rho[\beta\nabla_\textbf{p} H\cdot \nabla_\textbf{p} H-\nabla_\textbf{p}^2H ]\\
+    &= 0
+\end{align*}
+Thus our dynamics produce the correct invariant distribution. Having verified this, we would now like to analyze the convergence of HMC in a quadratic basin, as we did previously for the case of linearly-perturbed gradient dynamics. As before we pass to the equation for $h = \rho/\tilde{\rho}$:
+\begin{align*}
+    \partial_t h &= \gamma d h + \gamma \textbf{p} \cdot \nabla_\textbf{p} h - \beta \gamma h \textbf{p} \cdot \nabla_\textbf{p} H - \nabla_\textbf{p} H \cdot \nabla_\textbf{x} h + \nabla_\textbf{x}H \cdot \nabla_\textbf{p} h \\
+    &- 2\nabla_\textbf{p} h \cdot \nabla_\textbf{p} H + h[\beta \norm{\nabla_\textbf{p} H}^2 - \nabla_\textbf{p}^2 H] + \beta^{-1} \nabla_\textbf{p}^2 h\\
+    &= [\nabla U(\textbf{x}) -\frac{\textbf{p}}{m}] \cdot \nabla_\textbf{p} h - \frac{\textbf{p}}{m} \cdot \nabla_\textbf{x} h + \beta^{-1} \nabla_\textbf{p}^2 h
+\end{align*}
+For $U(\textbf{x}) = \frac{1}{2} \textbf{x}^\dagger \textbf{A} \textbf{x}$, we can write this as
+\begin{align*}
+    \partial_t h(\textbf{s}) &= \nabla_\textbf{s} h \cdot \textbf{Q}\textbf{s} + \beta^{-1} \nabla_\textbf{p}^2 h
+\end{align*}
+where $\textbf{s} = (\textbf{x},\textbf{p})$ and
+\begin{align*}
+    \textbf{Q} &= \begin{bmatrix}
+    \textbf{0} & -m^{-1}\textbf{I} \\
+    \textbf{A} & -m^{-1}\textbf{I}
+    \end{bmatrix}
+\end{align*}
+As before, we observe that the convergence is likely dictated by the eigenfunctions of the form $h = \textbf{w}^\dagger \textbf{s}$, leading to the eigenvalue equation
+\begin{align*}
+    \lambda\textbf{w}^\dagger \textbf{s} &= \textbf{w}^\dagger\textbf{Q} \textbf{s}
+\end{align*}
+Thus we need to identify the eigenvalues and eigenvectors of $\textbf{Q}^\dagger$. The eigenvalue equation for $\textbf{Q}^\dagger$ is
+\begin{align*}
+    0 &= \begin{vmatrix}
+    -\lambda \textbf{I} & \textbf{A}\\
+    -m^{-1}\textbf{I} & -(m^{-1} + \lambda)\textbf{I}
+    \end{vmatrix}\\
+    &= \det(\lambda(m^{-1} + \lambda) \textbf{I} + m^{-1} \textbf{A})
+\end{align*}
+Thus we can obtain the eigenvalues of $\textbf{Q}$ be solving the following generalized eigenproblem:
+\begin{align*}
+    \textbf{A}\textbf{v} &= -m\lambda(m^{-1} + \lambda) \textbf{v}
+\end{align*}
+For each eigenvalue $\kappa$ of $\textbf{A}$, the associated eigenvalues of $\textbf{Q}$ are
+\begin{align*}
+    \lambda &= -\frac{1}{2m} \bigg(1 \pm \sqrt{1 - 4m\kappa}\bigg)
+\end{align*}
+Taking $\kappa_0$ to be the minimal eigenvalue of $\textbf{A}$, we see that the maximal eigenvalue of $\textbf{Q}$ is
+\begin{align*}
+    \lambda_{m} &= \frac{1}{2m}\bigg(-1 +  \sqrt{1 - 4m\kappa_0}\bigg)
+\end{align*}
+When $m \to 0$, this approaches $\lambda_m = -\kappa_0$, recapitulating the performance of naive stochastic gradient dynamics. However, as $m$ increases, the performance of HMC gets better. Optimal performance is obtained by taking $m = (4\kappa_0)^{-1}$. In this case, $\lambda_m = -2\kappa_0$. From this we find that HMC can in principle double the rate of convergence in a quadratic potential, compared to naive gradient dynamics.
+
+We thus find that the relative performance of HMC vs. level set-enhanced gradient dynamics depends on the condition number of $\textbf{A}$. When $\textbf{A}$ is well-conditioned, the level-set enhancement, which at best may average the rates of the largest and smallest directions in the potential, does not provide much speedup. However, when $\textbf{A}$ is very ill-conditioned, the factor of 2 speedup provided by HMC may be eclipsed by that provided by the level set-enhanced dynamics.
+
+\end{document}
+
